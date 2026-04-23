@@ -8,6 +8,8 @@ type Color = {
     a:number
 }
 
+const color = (r:number = 0, g:number = 0, b:number = 0, a:number = 255):Color => ({ r, g, b, a })
+
 export class TestScene implements Scene {
     width:number
     height:number
@@ -15,25 +17,32 @@ export class TestScene implements Scene {
     buf!:Buffer
 
     image?:ImageData
+    bgColor:Color
 
     constructor (width:number, height:number) {
         this.width = width
         this.height = height
+        this.bgColor = color(12, 17, 1)
+
+        this.buf = createBuffer(this.width, this.height)
     }
 
-    update () {}
+    update () {
+        for (let i = 0; i < 100000; i++) {
+            const it = Math.random()
+        }
+    }
 
     clear () {
         for (let i = 0; i < this.buf.byteLength; i++) {
-            this.buf[i * 4] = 12
-            this.buf[i * 4 + 1] = 12
-            this.buf[i * 4 + 2] = 12
+            this.buf[i * 4] = this.bgColor.r
+            this.buf[i * 4 + 1] = this.bgColor.g
+            this.buf[i * 4 + 2] = this.bgColor.b
             this.buf[i * 4 + 3] = 255
         }
     }
 
-    draw(): Buffer {
-        this.buf = createBuffer(this.width, this.height)
+    draw():Buffer {
         this.clear()
         this.drawPixel(Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
         this.drawImage(32, 32, 0, 0, 8, 8)
