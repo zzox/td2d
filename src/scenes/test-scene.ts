@@ -1,16 +1,8 @@
 import { Buffer, createBuffer } from '../core/buffer'
+import { clear, Color, color, drawImage, drawPixel } from '../core/draw'
 import { keys } from '../core/keys'
 import { Scene } from '../core/scene'
 import { Actor, getActor } from '../data/actor-data'
-
-type Color = {
-    r:number
-    g:number
-    b:number
-    a:number
-}
-
-const color = (r:number = 0, g:number = 0, b:number = 0, a:number = 255):Color => ({ r, g, b, a })
 
 export class TestScene implements Scene {
     width:number
@@ -44,48 +36,9 @@ export class TestScene implements Scene {
     }
     
     draw():Buffer {
-        this.clear()
-        this.drawPixel(Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
-        this.drawImage(this.guy.pos.x, this.guy.pos.y, 0, 0, 8, 8)
+        clear(this.buf, this.bgColor)
+        drawPixel(this.buf, this.width, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
+        drawImage(this.image!, this.buf, this.guy.pos.x, this.guy.pos.y, 0, 0, 8, 8)
         return this.buf
-    }
-
-    // move fol
-    clear () {
-        for (let i = 0; i < this.buf.byteLength; i++) {
-            this.buf[i * 4] = this.bgColor.r
-            this.buf[i * 4 + 1] = this.bgColor.g
-            this.buf[i * 4 + 2] = this.bgColor.b
-            this.buf[i * 4 + 3] = 255
-        }
-    }
-
-    drawImage (x:number, y:number, sx:number, sy:number, sw:number, sh:number) {
-        if (!this.image) {
-            throw 'No Image!'
-        }
-
-        for (let i = sx; i < sx + sw; i++) {
-            for (let j = sy; j < sy + sh; j++) {
-                const index = i + j * this.image.width
-                const ptr = index * 4
-                if (this.image.data[ptr + 2] === 0) continue
-                this.drawPixel(x + i, y + j, {
-                    r: this.image.data[ptr],
-                    g: this.image.data[ptr + 1],
-                    b: this.image.data[ptr + 2],
-                    a: 255 //this.image.data[ptr + 3]
-                })
-            }
-        }
-    }
-
-    drawPixel (x:number, y:number, color:Color) {
-        const index = (x + y * this.width)
-        const pos = 4 * index
-        this.buf[pos] = color.r
-        this.buf[pos + 1] = color.g
-        this.buf[pos + 2] = color.b
-        this.buf[pos + 3] = color.a
     }
 }
