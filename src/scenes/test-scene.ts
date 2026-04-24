@@ -1,5 +1,7 @@
 import { Buffer, createBuffer } from '../core/buffer'
+import { keys } from '../core/keys'
 import { Scene } from '../core/scene'
+import { Actor, getActor } from '../data/actor-data'
 
 type Color = {
     r:number
@@ -19,20 +21,36 @@ export class TestScene implements Scene {
     image?:ImageData
     bgColor:Color
 
+    guy:Actor
+
     constructor (width:number, height:number) {
         this.width = width
         this.height = height
         this.bgColor = color(12, 17, 1)
 
         this.buf = createBuffer(this.width, this.height)
+
+        this.guy = getActor()
+        this.guy.pos.x = 32
+        this.guy.pos.y = 48
     }
 
     update () {
-        for (let i = 0; i < 100000; i++) {
-            const it = Math.random()
+        if (keys.get('ArrowLeft')) {
+            this.guy.pos.x--
+        } else if (keys.get('ArrowRight')) {
+            this.guy.pos.x++
         }
     }
+    
+    draw():Buffer {
+        this.clear()
+        this.drawPixel(Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
+        this.drawImage(this.guy.pos.x, this.guy.pos.y, 0, 0, 8, 8)
+        return this.buf
+    }
 
+    // move fol
     clear () {
         for (let i = 0; i < this.buf.byteLength; i++) {
             this.buf[i * 4] = this.bgColor.r
@@ -40,13 +58,6 @@ export class TestScene implements Scene {
             this.buf[i * 4 + 2] = this.bgColor.b
             this.buf[i * 4 + 3] = 255
         }
-    }
-
-    draw():Buffer {
-        this.clear()
-        this.drawPixel(Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
-        this.drawImage(32, 32, 0, 0, 8, 8)
-        return this.buf
     }
 
     drawImage (x:number, y:number, sx:number, sy:number, sw:number, sh:number) {
