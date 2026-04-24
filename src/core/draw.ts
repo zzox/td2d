@@ -18,18 +18,18 @@ export const clear = (buf:Buffer, color:Color) => {
     }
 }
 
-export const drawImage = (image:ImageData, buffer:Buffer, x:number, y:number, sx:number, sy:number, sw:number, sh:number) => {
+export const drawImage = (source:Buffer, target:Buffer, x:number, y:number, sx:number, sy:number, sw:number, sh:number) => {
     for (let i = sx; i < sx + sw; i++) {
-        if (x + i < 0 || x + i >= buffer.width) continue
+        if (x + i < 0 || x + i >= target.width) continue
         for (let j = sy; j < sy + sh; j++) {
-            if (j + y < 0 || j + y >= buffer.height) continue
-            const index = i + j * image.width
+            if (j + y < 0 || j + y >= target.height) continue
+            const index = i + j * source.width
             const ptr = index * 4
-            if (image.data[ptr + 2] === 0) continue
-            drawPixel(buffer, 240, x + i, y + j, {
-                r: image.data[ptr],
-                g: image.data[ptr + 1],
-                b: image.data[ptr + 2],
+            if (source.data[ptr + 3] === 0) continue
+            drawPixel(target, 240, x + i, y + j, {
+                r: source.data[ptr],
+                g: source.data[ptr + 1],
+                b: source.data[ptr + 2],
                 a: 255 //image.data[ptr + 3]
             })
         }

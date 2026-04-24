@@ -1,7 +1,7 @@
 import { Buffer } from './buffer'
 
 export interface Scene {
-    image?:ImageData
+    image?:Buffer
     update ():void
     draw ():Buffer
 }

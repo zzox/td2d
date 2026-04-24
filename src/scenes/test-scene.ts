@@ -12,7 +12,7 @@ export class TestScene implements Scene {
 
     buf!:Buffer
 
-    image?:ImageData
+    image?:Buffer
     bgColor:Color
 
     guy:Actor
