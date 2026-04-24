@@ -121,10 +121,10 @@ const resizeCanvas = () => {
 
   const maxW = Math.floor(availW / (w * scale - padding))
   const maxH = Math.floor(availH / (h * scale - padding))
-  // lower than maxMultiplier, but at least two
+
   const multi = Math.max(Math.min(Math.min(maxW, maxH), maxMulti), 1)
 
-  debugScale = multi
+  debugScale = multi * scale
 
   const width = Math.floor(multi * w * scale)
   const height = Math.floor(multi * h * scale)
