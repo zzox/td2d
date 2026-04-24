@@ -1,4 +1,3 @@
-import { Buffer } from './core/buffer'
 import { keys, justPressed, clearJustPressed } from './core/keys'
 import { Scene } from './core/scene'
 import { TestScene } from './scenes/test-scene'
