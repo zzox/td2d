@@ -10,17 +10,19 @@ export type Color = {
 export const color = (r:number = 0, g:number = 0, b:number = 0, a:number = 255):Color => ({ r, g, b, a })
 
 export const clear = (buf:Buffer, color:Color) => {
-    for (let i = 0; i < buf.byteLength; i++) {
-        buf[i * 4] = color.r
-        buf[i * 4 + 1] = color.g
-        buf[i * 4 + 2] = color.b
-        buf[i * 4 + 3] = 255
+    for (let i = 0; i < buf.data.byteLength; i++) {
+        buf.data[i * 4] = color.r
+        buf.data[i * 4 + 1] = color.g
+        buf.data[i * 4 + 2] = color.b
+        buf.data[i * 4 + 3] = 255
     }
 }
 
 export const drawImage = (image:ImageData, buffer:Buffer, x:number, y:number, sx:number, sy:number, sw:number, sh:number) => {
     for (let i = sx; i < sx + sw; i++) {
+        if (x + i < 0 || x + i >= buffer.width) continue
         for (let j = sy; j < sy + sh; j++) {
+            if (j + y < 0 || j + y >= buffer.height) continue
             const index = i + j * image.width
             const ptr = index * 4
             if (image.data[ptr + 2] === 0) continue
@@ -37,8 +39,8 @@ export const drawImage = (image:ImageData, buffer:Buffer, x:number, y:number, sx
 export const drawPixel = (buf:Buffer, width:number, x:number, y:number, color:Color) => {
     const index = (x + y * width)
     const pos = 4 * index
-    buf[pos] = color.r
-    buf[pos + 1] = color.g
-    buf[pos + 2] = color.b
-    buf[pos + 3] = color.a
+    buf.data[pos] = color.r
+    buf.data[pos + 1] = color.g
+    buf.data[pos + 2] = color.b
+    buf.data[pos + 3] = color.a
 }

@@ -45,7 +45,7 @@ const draw = () => {
 
 //   clear()
   const imgData = context.createImageData(width, height)
-  imgData.data.set(scene.draw())
+  imgData.data.set(scene.draw().data)
   context.putImageData(imgData, 0, 0)
 
   const time = performance.now()
