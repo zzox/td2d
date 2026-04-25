@@ -2,9 +2,37 @@ import { Buffer, createBuffer } from '../core/buffer'
 import { FPS, NumTilesHeight, NumTilesWidth, TileHeight, TileWidth } from '../core/const'
 import { clear, Color, color, drawImage, drawPixel, drawTile } from '../core/draw'
 import { justPressed, keys } from '../core/keys'
+import { checkDirectionalCollision, overlaps } from '../core/physics'
 import { Scene } from '../core/scene'
-import { Actor, getActor } from '../data/actor-data'
-import { forEachGI, Grid, makeGrid, setGridItem } from '../util/grid'
+import { Collides, collides, vec2 } from '../core/types'
+import { Actor, getActor, Thing } from '../data/actor-data'
+import { forEachGI, getGridItem, Grid, makeGrid, setGridItem } from '../util/grid'
+
+const getWall = (grid:Grid<number>, x:number, y:number):[number, number, number, number, Collides] => {
+  const xx = x * TileWidth
+  const yy = y * TileHeight
+  const w = TileWidth
+  const h = TileHeight
+
+  const c = collides(
+    getGridItem(grid, x - 1, y) === 0,
+    getGridItem(grid, x + 1, y) === 0,
+    getGridItem(grid, x, y - 1) === 0,
+    getGridItem(grid, x, y + 1) === 0,
+  )
+
+  return [xx, yy, w, h, c]
+}
+
+// Returns true if there's a collision
+export const collideWall = (thing:Thing, walls:Grid<number>, x:number, y:number):boolean => {
+  const [wx, wy, ww, wh, collides] = getWall(walls, x, y)
+  if (overlaps(thing.pos.x, thing.pos.y, thing.size.x, thing.size.y, wx, wy, ww, wh)) {
+    return checkDirectionalCollision(thing, { pos: vec2(wx, wy), size: vec2(ww, wh) } as Thing, true, collides)
+  }
+  return false
+}
+
 
 export class TestScene implements Scene {
     width:number
@@ -16,6 +44,7 @@ export class TestScene implements Scene {
     bgColor:Color
 
     guy:Actor
+    things:Thing[] = []
 
     walls!:Grid<number>
 
@@ -27,13 +56,20 @@ export class TestScene implements Scene {
         this.buf = createBuffer(this.width, this.height)
 
         this.guy = getActor()
-        this.guy.pos.x = 0
-        this.guy.pos.y = 0
+        this.guy.pos.x = 32
+        this.guy.pos.y = 32
 
         this.makeWalls()
+
+        console.log(this.walls, getWall(this.walls, 0, 4))
+
+        this.things = [this.guy]
     }
 
     update () {
+        this.guy.last.x = this.guy.pos.x
+        this.guy.last.y = this.guy.pos.y
+
         if (keys.get('ArrowLeft')) {
             this.guy.pos.x--
             this.guy.pos.x--
@@ -52,6 +88,8 @@ export class TestScene implements Scene {
         if (this.guy.pos.y + this.guy.size.y > this.height) {
             this.guy.pos.y = this.height - this.guy.size.y
         }
+
+        this.checkCollisions()
     }
 
     draw ():Buffer {
@@ -62,6 +100,25 @@ export class TestScene implements Scene {
             if (wall > 0) drawTile(this.image!, this.buf, 56 + wall - 1, x + y * this.walls.width)
         })
         return this.buf
+    }
+
+    checkCollisions () {
+        // wall collisions
+        this.things.forEach(thing => {
+            let collided = false
+            forEachGI(this.walls, (x, y, wall) => {
+                if (wall === 0) return
+
+                if (collideWall(thing, this.walls, x, y)) {
+                    collided = true
+                }
+            })
+
+            if (collided) {
+                // this.handleCollision(thing, true)
+            }
+        })
+
     }
 
     makeWalls () {
