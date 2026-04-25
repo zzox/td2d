@@ -1,11 +1,12 @@
 import { Thing } from '../data/actor-data'
 import { clamp } from '../util/util'
 import { FPS } from './const'
-import { Collides } from './types'
+import { collides, Collides } from './types'
 
 const gravity = 240
 
-export const allCollides = { left: true, right: true, up: true, down: true }
+export const allCollides = () => collides()
+export const noCollides = () => collides(false, false, false, false)
 
 export const updatePhysics = (thing:Thing) => {
   thing.last.x = thing.pos.x
@@ -38,7 +39,7 @@ export const updatePhysics = (thing:Thing) => {
   // reset flags here after the scene and sprites have been updated,
   // hopefully after the developer has done what they need with the
   // touching flags.
-  // resetTouchingFlags();
+  resetTouchingFlags(thing);
 
   // update velocity based on position
   thing.pos.x += newX * delta
@@ -88,7 +89,7 @@ const checkUp = (fromThing:Thing, intoThing:Thing, separates:boolean, intoCollid
   if (/* fromThing.collides.up && */ intoCollides.down
     && fromThing.last.y >= intoThing.pos.y + intoThing.size.y
     && fromThing.pos.y < intoThing.pos.y + intoThing.size.y) {
-    // fromThing.touching.up = true
+    fromThing.touching.up = true
     if (separates) {
       separateUp(fromThing, intoThing)
       bounceY(fromThing)
@@ -103,7 +104,7 @@ const checkDown = (fromThing:Thing, intoThing:Thing, separates:boolean, intoColl
   if (/* fromThing.collides.down && */ intoCollides.up
     && fromThing.last.y + fromThing.size.y <= intoThing.pos.y
     && fromThing.pos.y + fromThing.size.y > intoThing.pos.y) {
-    // fromThing.touching.down = true
+    fromThing.touching.down = true
     if (separates) {
       separateDown(fromThing, intoThing)
       bounceY(fromThing)
@@ -118,7 +119,7 @@ const checkLeft = (fromThing:Thing, intoThing:Thing, separates:boolean, intoColl
   if (/* fromThing.collides.left && */ intoCollides.right
     && fromThing.last.x >= intoThing.pos.x + intoThing.size.x
     && fromThing.pos.x < intoThing.pos.x + intoThing.size.x) {
-    // fromThing.touching.left = true
+    fromThing.touching.left = true
     if (separates) {
       separateLeft(fromThing, intoThing)
       bounceX(fromThing)
@@ -133,7 +134,7 @@ const checkRight = (fromThing:Thing, intoThing:Thing, separates:boolean, intoCol
   if (/* fromThing.collides.right && */ intoCollides.left
     && fromThing.last.x + fromThing.size.x <= intoThing.pos.x
     && fromThing.pos.x + fromThing.size.x > intoThing.pos.x) {
-    // fromThing.touching.right = true
+    fromThing.touching.right = true
     if (separates) {
       separateRight(fromThing, intoThing)
       bounceX(fromThing)
@@ -169,4 +170,11 @@ const bounceX = (thing:Thing) => {
 const bounceY = (thing:Thing) => {
   thing.vel.y = -thing.vel.y * thing.bounce
   if (Math.abs(thing.vel.y) < 3) thing.vel.y = 0
+}
+
+const resetTouchingFlags = (thing:Thing) => {
+  thing.touching.left = false
+  thing.touching.right = false
+  thing.touching.up = false
+  thing.touching.down = false
 }

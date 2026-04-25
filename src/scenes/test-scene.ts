@@ -75,7 +75,7 @@ export class TestScene implements Scene {
       this.guy.vel.x = 0
     }
 
-    if (justPressed.get('ArrowUp')) {
+    if (justPressed.get('z') && this.guy.touching.down) {
       this.guy.vel.y = -120
     }
 

@@ -1,4 +1,5 @@
-import { vec2, Vec2 } from '../core/types'
+import { noCollides } from '../core/physics'
+import { Collides, vec2, Vec2 } from '../core/types'
 
 // tile index of the thing
 export enum ThingType {
@@ -27,6 +28,7 @@ type PhysicsObject = {
   drag:Vec2
   maxVel:Vec2
   size:Vec2
+  touching:Collides
   gravityFactor:number
 }
 
@@ -50,6 +52,7 @@ const defaultThing:Thing = {
   acc: vec2(),
   drag: vec2(),
   size: vec2(8, 8),
+  touching: noCollides(),
   gravityFactor: 1,
   dead: false,
   health: 1,
