@@ -1,9 +1,9 @@
 import { Thing } from '../data/actor-data'
+import { clamp } from '../util/util'
+import { FPS } from './const'
 import { Collides } from './types'
 
-// TODO: get from const
-const fps = 60
-const gravity = 120
+const gravity = 240
 
 export const allCollides = { left: true, right: true, up: true, down: true }
 
@@ -11,8 +11,38 @@ export const updatePhysics = (thing:Thing) => {
   thing.last.x = thing.pos.x
   thing.last.y = thing.pos.y
 
-  thing.pos.x += thing.vel.x / fps
-  thing.pos.y += thing.vel.y / fps
+  const delta = 1 / FPS
+
+  // calculate increase/decrease velocity based on gravity and acceleration
+  let newX = thing.vel.x + delta * thing.acc.x;
+  let newY = thing.vel.y + delta * (thing.acc.y + (gravity * thing.gravityFactor));
+
+  // subtract drag
+  if (newX > 0) {
+    newX = Math.max(0, newX - thing.drag.x * delta);
+  }
+  if (newX < 0) {
+    newX = Math.min(0, newX + thing.drag.x * delta);
+  }
+  if (newY > 0) {
+    newY = Math.max(0, newY - thing.drag.y * delta);
+  }
+  if (newY < 0) {
+    newY = Math.min(0, newY + thing.drag.y * delta);
+  }
+
+  // configure velocity around max velocity.
+  thing.vel.x = clamp(newX, -thing.maxVel.x, thing.maxVel.x);
+  thing.vel.y = clamp(newY, -thing.maxVel.y, thing.maxVel.y);
+
+  // reset flags here after the scene and sprites have been updated,
+  // hopefully after the developer has done what they need with the
+  // touching flags.
+  // resetTouchingFlags();
+
+  // update velocity based on position
+  thing.pos.x += newX * delta
+  thing.pos.y += newY * delta
 }
 
 // Returns true if two physics bodies overlap.

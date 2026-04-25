@@ -8,3 +8,6 @@ export const makeArray = <T>(length:number, value:T):T[] => Array(length).fill(v
 export const copyArray = <T>(arr:T[]):T[] => arr.map(i => i)
 
 export const toRadian = (degrees:number) => degrees * Math.PI / 180
+
+export const clamp = (value:number, min:number, max:number) =>
+  Math.min(Math.max(value, min), max)

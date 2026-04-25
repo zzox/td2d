@@ -2,7 +2,7 @@ import { Buffer, createBuffer } from '../core/buffer'
 import { FPS, NumTilesHeight, NumTilesWidth, TileHeight, TileWidth } from '../core/const'
 import { clear, Color, color, drawImage, drawPixel, drawTile } from '../core/draw'
 import { justPressed, keys } from '../core/keys'
-import { checkDirectionalCollision, overlaps } from '../core/physics'
+import { checkDirectionalCollision, overlaps, updatePhysics } from '../core/physics'
 import { Scene } from '../core/scene'
 import { Collides, collides, vec2 } from '../core/types'
 import { Actor, getActor, Thing } from '../data/actor-data'
@@ -67,39 +67,31 @@ export class TestScene implements Scene {
   }
 
   update () {
-    this.guy.last.x = this.guy.pos.x
-    this.guy.last.y = this.guy.pos.y
-
     if (keys.get('ArrowLeft')) {
-      this.guy.pos.x--
-      this.guy.pos.x--
+      this.guy.vel.x = -120
     } else if (keys.get('ArrowRight')) {
-      this.guy.pos.x++
-      this.guy.pos.x++
+      this.guy.vel.x = 120
+    } else {
+      this.guy.vel.x = 0
     }
 
     if (justPressed.get('ArrowUp')) {
       this.guy.vel.y = -120
     }
 
-    this.guy.vel.y += 2
-    this.guy.pos.y += this.guy.vel.y / FPS
-
-    if (this.guy.pos.y + this.guy.size.y > this.height) {
-      this.guy.pos.y = this.height - this.guy.size.y
-    }
+    updatePhysics(this.guy)
 
     this.checkCollisions()
   }
 
   draw ():Buffer {
-      clear(this.buf, this.bgColor)
-      drawPixel(this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
-      drawImage(this.image!, this.buf, Math.floor(this.guy.pos.x), Math.floor(this.guy.pos.y), 8, 8, 8, 8)
-      forEachGI(this.walls, (x, y, wall) => {
-        if (wall > 0) drawTile(this.image!, this.buf, 56 + wall - 1, x + y * this.walls.width)
-      })
-      return this.buf
+    clear(this.buf, this.bgColor)
+    drawPixel(this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
+    drawImage(this.image!, this.buf, Math.floor(this.guy.pos.x), Math.floor(this.guy.pos.y), 8, 8, 8, 8)
+    forEachGI(this.walls, (x, y, wall) => {
+      if (wall > 0) drawTile(this.image!, this.buf, 56 + wall - 1, x + y * this.walls.width)
+    })
+    return this.buf
   }
 
   checkCollisions () {

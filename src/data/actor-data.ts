@@ -23,6 +23,9 @@ type PhysicsObject = {
   pos:Vec2
   last:Vec2
   vel:Vec2
+  acc:Vec2
+  drag:Vec2
+  maxVel:Vec2
   size:Vec2
   gravityFactor:number
 }
@@ -43,6 +46,9 @@ const defaultThing:Thing = {
   pos: vec2(),
   last: vec2(),
   vel: vec2(),
+  maxVel: vec2(1_000_000, 1_000_000),
+  acc: vec2(),
+  drag: vec2(),
   size: vec2(8, 8),
   gravityFactor: 1,
   dead: false,
