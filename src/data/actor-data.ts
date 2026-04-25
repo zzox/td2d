@@ -57,5 +57,5 @@ const defaultThing:Thing = {
 export type Actor = Thing & {}
 
 export const getActor = ():Actor => {
-    return { ...defaultThing }
+  return { ...defaultThing }
 } 

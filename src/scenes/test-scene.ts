@@ -35,106 +35,106 @@ export const collideWall = (thing:Thing, walls:Grid<number>, x:number, y:number)
 
 
 export class TestScene implements Scene {
-    width:number
-    height:number
+  width:number
+  height:number
 
-    buf!:Buffer
+  buf!:Buffer
 
-    image?:Buffer
-    bgColor:Color
+  image?:Buffer
+  bgColor:Color
 
-    guy:Actor
-    things:Thing[] = []
+  guy:Actor
+  things:Thing[] = []
 
-    walls!:Grid<number>
+  walls!:Grid<number>
 
-    constructor (width:number, height:number) {
-        this.width = width
-        this.height = height
-        this.bgColor = color(12, 17, 1)
+  constructor (width:number, height:number) {
+    this.width = width
+    this.height = height
+    this.bgColor = color(12, 17, 1)
 
-        this.buf = createBuffer(this.width, this.height)
+    this.buf = createBuffer(this.width, this.height)
 
-        this.guy = getActor()
-        this.guy.pos.x = 32
-        this.guy.pos.y = 32
+    this.guy = getActor()
+    this.guy.pos.x = 32
+    this.guy.pos.y = 32
 
-        this.makeWalls()
+    this.makeWalls()
 
-        console.log(this.walls, getWall(this.walls, 0, 4))
+    console.log(this.walls, getWall(this.walls, 0, 4))
 
-        this.things = [this.guy]
+    this.things = [this.guy]
+  }
+
+  update () {
+    this.guy.last.x = this.guy.pos.x
+    this.guy.last.y = this.guy.pos.y
+
+    if (keys.get('ArrowLeft')) {
+      this.guy.pos.x--
+      this.guy.pos.x--
+    } else if (keys.get('ArrowRight')) {
+      this.guy.pos.x++
+      this.guy.pos.x++
     }
 
-    update () {
-        this.guy.last.x = this.guy.pos.x
-        this.guy.last.y = this.guy.pos.y
+    if (justPressed.get('ArrowUp')) {
+      this.guy.vel.y = -120
+    }
 
-        if (keys.get('ArrowLeft')) {
-            this.guy.pos.x--
-            this.guy.pos.x--
-        } else if (keys.get('ArrowRight')) {
-            this.guy.pos.x++
-            this.guy.pos.x++
+    this.guy.vel.y += 2
+    this.guy.pos.y += this.guy.vel.y / FPS
+
+    if (this.guy.pos.y + this.guy.size.y > this.height) {
+      this.guy.pos.y = this.height - this.guy.size.y
+    }
+
+    this.checkCollisions()
+  }
+
+  draw ():Buffer {
+      clear(this.buf, this.bgColor)
+      drawPixel(this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
+      drawImage(this.image!, this.buf, Math.floor(this.guy.pos.x), Math.floor(this.guy.pos.y), 8, 8, 8, 8)
+      forEachGI(this.walls, (x, y, wall) => {
+        if (wall > 0) drawTile(this.image!, this.buf, 56 + wall - 1, x + y * this.walls.width)
+      })
+      return this.buf
+  }
+
+  checkCollisions () {
+    // wall collisions
+    this.things.forEach(thing => {
+      let collided = false
+      forEachGI(this.walls, (x, y, wall) => {
+        if (wall === 0) return
+
+        if (collideWall(thing, this.walls, x, y)) {
+          collided = true
         }
+      })
 
-        if (justPressed.get('ArrowUp')) {
-            this.guy.vel.y = -120
-        }
+      if (collided) {
+        // this.handleCollision(thing, true)
+      }
+    })
 
-        this.guy.vel.y += 2
-        this.guy.pos.y += this.guy.vel.y / FPS
+  }
 
-        if (this.guy.pos.y + this.guy.size.y > this.height) {
-            this.guy.pos.y = this.height - this.guy.size.y
-        }
-
-        this.checkCollisions()
+  makeWalls () {
+    this.walls = makeGrid(NumTilesWidth, NumTilesHeight, 0)
+    for (let i = 0; i < NumTilesWidth; i++) {
+      // this.addTile(i, 0, 1)
+      this.addTile(i, NumTilesHeight - 1, 3)
     }
 
-    draw ():Buffer {
-        clear(this.buf, this.bgColor)
-        drawPixel(this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
-        drawImage(this.image!, this.buf, Math.floor(this.guy.pos.x), Math.floor(this.guy.pos.y), 8, 8, 8, 8)
-        forEachGI(this.walls, (x, y, wall) => {
-            if (wall > 0) drawTile(this.image!, this.buf, 56 + wall - 1, x + y * this.walls.width)
-        })
-        return this.buf
+    for (let i = 0; i < NumTilesHeight; i++) {
+      this.addTile(0, i, 1)
+      this.addTile(NumTilesWidth - 1, i, 5)
     }
+  }
 
-    checkCollisions () {
-        // wall collisions
-        this.things.forEach(thing => {
-            let collided = false
-            forEachGI(this.walls, (x, y, wall) => {
-                if (wall === 0) return
-
-                if (collideWall(thing, this.walls, x, y)) {
-                    collided = true
-                }
-            })
-
-            if (collided) {
-                // this.handleCollision(thing, true)
-            }
-        })
-
-    }
-
-    makeWalls () {
-        this.walls = makeGrid(NumTilesWidth, NumTilesHeight, 0)
-        for (let i = 0; i < NumTilesWidth; i++) {
-            // this.addTile(i, 0, 1)
-            this.addTile(i, NumTilesHeight - 1, 3)
-        }
-
-        for (let i = 0; i < NumTilesHeight; i++) {
-            this.addTile(0, i, 1)
-            this.addTile(NumTilesWidth - 1, i, 5)
-        }
-    }
-
-    addTile (x:number, y:number, num:number) {
-        setGridItem(this.walls, x, y, num)
-    }
+  addTile (x:number, y:number, num:number) {
+    setGridItem(this.walls, x, y, num)
+  }
 }

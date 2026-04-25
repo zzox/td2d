@@ -132,11 +132,11 @@ const separateRight = (fromThing:Thing, intoThing:Thing) => {
 }
 
 const bounceX = (thing:Thing) => {
-  thing.vel.x = thing.vel.x * thing.bounce
+  thing.vel.x = -thing.vel.x * thing.bounce
   if (Math.abs(thing.vel.x) < 3) thing.vel.x = 0
 }
 
 const bounceY = (thing:Thing) => {
-  thing.vel.y = thing.vel.y * thing.bounce
+  thing.vel.y = -thing.vel.y * thing.bounce
   if (Math.abs(thing.vel.y) < 3) thing.vel.y = 0
 }
