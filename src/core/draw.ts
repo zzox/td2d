@@ -15,7 +15,7 @@ export const clear = (buf:Buffer, color:Color) => {
     buf.data[i * 4] = color.r
     buf.data[i * 4 + 1] = color.g
     buf.data[i * 4 + 2] = color.b
-    buf.data[i * 4 + 3] = 255
+    buf.data[i * 4 + 3] = color.a
   }
 }
 
@@ -30,7 +30,7 @@ export const drawTile = (source:Buffer, target:Buffer, fromTile:number, toTile:n
   drawImage(source, target, toX * TileWidth, toY * TileHeight, fromX * TileWidth, fromY * TileHeight, TileWidth, TileHeight)
 }
 
-export const drawImage = (source:Buffer, target:Buffer, x:number, y:number, sx:number, sy:number, sw:number, sh:number) => {
+export const drawImage = (source:Buffer, target:Buffer, x:number, y:number, sx:number, sy:number, sw:number, sh:number, a:number = 1.0) => {
   for (let i = sx; i < sx + sw; i++) {
     if (x + i - sx < 0 || x + i - sx >= target.width) continue
     for (let j = sy; j < sy + sh; j++) {
@@ -42,17 +42,26 @@ export const drawImage = (source:Buffer, target:Buffer, x:number, y:number, sx:n
         r: source.data[ptr],
         g: source.data[ptr + 1],
         b: source.data[ptr + 2],
-        a: 255 //image.data[ptr + 3]
+        a: source.data[ptr + 3] * a
       })
     }
   }
 }
 
-export const drawPixel = (buf:Buffer, x:number, y:number, color:Color) => {
+export const drawPixel = (buf:Buffer, x:number, y:number, { r, g, b, a }:Color) => {
   const index = Math.floor(x) + Math.floor(y) * buf.width
   const pos = 4 * index
-  buf.data[pos] = color.r
-  buf.data[pos + 1] = color.g
-  buf.data[pos + 2] = color.b
-  buf.data[pos + 3] = color.a
+  if (a >= 255) {
+    buf.data[pos] = r
+    buf.data[pos + 1] = g
+    buf.data[pos + 2] = b
+    buf.data[pos + 3] = a
+  } else {
+    const srcA = a / 255
+    const invA = 1 - srcA
+    buf.data[pos] = r * srcA + buf.data[pos] * invA
+    buf.data[pos + 1] = g * srcA + buf.data[pos + 1] * invA
+    buf.data[pos + 2] = b * srcA + buf.data[pos + 2] * invA
+    buf.data[pos + 3] = a + buf.data[pos + 3]
+  }
 }

@@ -5,7 +5,8 @@ import { Collides, vec2, Vec2 } from '../core/types'
 export enum ThingType {
   Nothing = -1,
   Guy = 0,
-  Bullet = 16
+  Bullet = 16,
+  Test = -2,
 }
 
 export enum ThingState {

@@ -5,7 +5,7 @@ import { justPressed, keys } from '../core/keys'
 import { checkDirectionalCollision, overlaps, updatePhysics } from '../core/physics'
 import { Scene } from '../core/scene'
 import { Collides, collides, vec2 } from '../core/types'
-import { Actor, getActor, Thing, ThingType } from '../data/actor-data'
+import { Actor, defaultThing, getActor, Thing, ThingType } from '../data/actor-data'
 import { makeBullet } from '../data/bullet-data'
 import { White } from '../data/colors'
 import { forEachGI, getGridItem, Grid, makeGrid, setGridItem } from '../util/grid'
@@ -35,6 +35,16 @@ export const collideWall = (thing:Thing, walls:Grid<number>, x:number, y:number)
   return false
 }
 
+const testBouncer = () => ({
+  ...defaultThing,
+  gravityFactor: 1,
+  size: vec2(16, 16),
+  pos: vec2(48, 100),
+  last: vec2(48, 100),
+  vel: vec2(60),
+  bounce: 1,
+  type: ThingType.Test
+})
 
 export class TestScene implements Scene {
   width:number
@@ -65,7 +75,7 @@ export class TestScene implements Scene {
 
     console.log(this.walls, getWall(this.walls, 0, 4))
 
-    this.things = [this.guy]
+    this.things = [this.guy, testBouncer()]
   }
 
   update () {
@@ -85,6 +95,10 @@ export class TestScene implements Scene {
       this.guyShoot()
     }
 
+    if (justPressed.get('g')) {
+      this.things.push(testBouncer())
+    }
+
     this.things.forEach(updatePhysics)
 
     this.checkCollisions()
@@ -99,8 +113,10 @@ export class TestScene implements Scene {
     this.things.forEach(t => {
       if (t.type === ThingType.Guy) {
         drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 8, 8, 8, 8)
-      } else if (t.type == ThingType.Bullet) {
+      } else if (t.type === ThingType.Bullet) {
         drawPixel(this.buf, t.pos.x, t.pos.y, White)
+      } else if (t.type === ThingType.Test) {
+        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 16, 16, 16, 16, 0.5)
       }
     })
 
