@@ -22,7 +22,7 @@ export const forEachGI = <T>(grid:Grid<T>, callback:(x:number, y:number, item:T)
 
 const mapGI = <T, TT>(grid:Grid<T>, callback:(x:number, y:number, item:T) => TT):Grid<TT> => {
   const items:TT[] = []
-  // ATTN: these are flipped so they are pushed to be accessed by grid.items[x + y * grid.width];
+  // ATTN: these are flipped so they are pushed to be accessed by grid.items[x + y * grid.width]
   for (let y = 0; y < grid.height; y++) {
     for (let x = 0; x < grid.width; x++) {
       items.push(callback(x, y, grid.items[x + y * grid.width]))

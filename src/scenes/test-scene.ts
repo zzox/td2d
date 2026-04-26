@@ -104,7 +104,7 @@ export class TestScene implements Scene {
       }
     })
 
-    const bunnies = 0;
+    const bunnies = 0
     for (let i = 0; i < bunnies; i++) {
       drawImage(this.image!, this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height) + 10, 8, 8, 48, 8)
     }

@@ -15,31 +15,31 @@ export const updatePhysics = (thing:Thing) => {
   const delta = 1 / FPS
 
   // calculate increase/decrease velocity based on gravity and acceleration
-  let newX = thing.vel.x + delta * thing.acc.x;
-  let newY = thing.vel.y + delta * (thing.acc.y + (gravity * thing.gravityFactor));
+  let newX = thing.vel.x + delta * thing.acc.x
+  let newY = thing.vel.y + delta * (thing.acc.y + (gravity * thing.gravityFactor))
 
   // subtract drag
   if (newX > 0) {
-    newX = Math.max(0, newX - thing.drag.x * delta);
+    newX = Math.max(0, newX - thing.drag.x * delta)
   }
   if (newX < 0) {
-    newX = Math.min(0, newX + thing.drag.x * delta);
+    newX = Math.min(0, newX + thing.drag.x * delta)
   }
   if (newY > 0) {
-    newY = Math.max(0, newY - thing.drag.y * delta);
+    newY = Math.max(0, newY - thing.drag.y * delta)
   }
   if (newY < 0) {
-    newY = Math.min(0, newY + thing.drag.y * delta);
+    newY = Math.min(0, newY + thing.drag.y * delta)
   }
 
   // configure velocity around max velocity.
-  thing.vel.x = clamp(newX, -thing.maxVel.x, thing.maxVel.x);
-  thing.vel.y = clamp(newY, -thing.maxVel.y, thing.maxVel.y);
+  thing.vel.x = clamp(newX, -thing.maxVel.x, thing.maxVel.x)
+  thing.vel.y = clamp(newY, -thing.maxVel.y, thing.maxVel.y)
 
   // reset flags here after the scene and sprites have been updated,
   // hopefully after the developer has done what they need with the
   // touching flags.
-  resetTouchingFlags(thing);
+  resetTouchingFlags(thing)
 
   // update velocity based on position
   thing.pos.x += newX * delta
