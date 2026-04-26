@@ -44,7 +44,7 @@ export type Thing = PhysicsObject & {
 //   isActor:boolean
 }
 
-const defaultThing:Thing = {
+export const defaultThing:Thing = {
   pos: vec2(),
   last: vec2(),
   vel: vec2(),
@@ -66,5 +66,5 @@ const defaultThing:Thing = {
 export type Actor = Thing & {}
 
 export const getActor = ():Actor => {
-  return { ...defaultThing }
+  return { ...defaultThing, type: ThingType.Guy }
 } 

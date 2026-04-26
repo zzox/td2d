@@ -49,7 +49,7 @@ export const drawImage = (source:Buffer, target:Buffer, x:number, y:number, sx:n
 }
 
 export const drawPixel = (buf:Buffer, x:number, y:number, color:Color) => {
-  const index = (x + y * buf.width)
+  const index = Math.floor(x) + Math.floor(y) * buf.width
   const pos = 4 * index
   buf.data[pos] = color.r
   buf.data[pos + 1] = color.g

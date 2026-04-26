@@ -5,7 +5,9 @@ import { justPressed, keys } from '../core/keys'
 import { checkDirectionalCollision, overlaps, updatePhysics } from '../core/physics'
 import { Scene } from '../core/scene'
 import { Collides, collides, vec2 } from '../core/types'
-import { Actor, getActor, Thing } from '../data/actor-data'
+import { Actor, getActor, Thing, ThingType } from '../data/actor-data'
+import { makeBullet } from '../data/bullet-data'
+import { White } from '../data/colors'
 import { forEachGI, getGridItem, Grid, makeGrid, setGridItem } from '../util/grid'
 
 const getWall = (grid:Grid<number>, x:number, y:number):[number, number, number, number, Collides] => {
@@ -79,19 +81,44 @@ export class TestScene implements Scene {
       this.guy.vel.y = -120
     }
 
-    updatePhysics(this.guy)
+    if (justPressed.get('x')) {
+      this.guyShoot()
+    }
+
+    this.things.forEach(updatePhysics)
 
     this.checkCollisions()
+
+    this.things = this.things.filter(t => !t.dead)
   }
 
   draw ():Buffer {
     clear(this.buf, this.bgColor)
-    drawPixel(this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
-    drawImage(this.image!, this.buf, Math.floor(this.guy.pos.x), Math.floor(this.guy.pos.y), 8, 8, 8, 8)
+    // drawPixel(this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
+
+    this.things.forEach(t => {
+      if (t.type === ThingType.Guy) {
+        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 8, 8, 8, 8)
+      } else if (t.type == ThingType.Bullet) {
+        drawPixel(this.buf, t.pos.x, t.pos.y, White)
+      }
+    })
+
+    const bunnies = 0;
+    for (let i = 0; i < bunnies; i++) {
+      drawImage(this.image!, this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height) + 10, 8, 8, 48, 8)
+    }
+
     forEachGI(this.walls, (x, y, wall) => {
       if (wall > 0) drawTile(this.image!, this.buf, 56 + wall - 1, x + y * this.walls.width)
     })
     return this.buf
+  }
+
+  guyShoot () {
+    const bullet = makeBullet(vec2(this.guy.pos.x + 6, this.guy.pos.y + 2), 240)
+    // if (this.guy.facing === ) {}
+    this.things.push(bullet)
   }
 
   checkCollisions () {
@@ -107,10 +134,15 @@ export class TestScene implements Scene {
       })
 
       if (collided) {
-        // this.handleCollision(thing, true)
+        this.handleCollision(thing)
       }
     })
+  }
 
+  handleCollision (thing:Thing) {
+    if (thing.type === ThingType.Bullet) {
+      thing.dead = true
+    }
   }
 
   makeWalls () {
