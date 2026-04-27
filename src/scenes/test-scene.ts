@@ -260,6 +260,8 @@ export class TestScene implements Scene {
 
     // multiply negative bullet velocity by weapon knockback
     this.guy.vel.x = -vel * this.weapon.knockback
+    this.guy.acc.x = 0
+    this.guy.acc.y = 0
     this.knocktime = this.weapon.knocktime
   }
 

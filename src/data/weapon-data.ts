@@ -7,7 +7,7 @@ export type Weapon = {
 
 export const getWeapon = ():Weapon => ({
   vel: 240,
-  knocktime: 0.1,
-  knockback: 0.25,
+  knocktime: 0.2,
+  knockback: 0.5,
   accuracy: 0.8
 })
