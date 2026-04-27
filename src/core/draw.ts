@@ -30,7 +30,7 @@ export const drawTile = (source:Buffer, target:Buffer, fromTile:number, toTile:n
   drawImage(source, target, toX * TileWidth, toY * TileHeight, fromX * TileWidth, fromY * TileHeight, TileWidth, TileHeight)
 }
 
-export const drawImage = (source:Buffer, target:Buffer, x:number, y:number, sx:number, sy:number, sw:number, sh:number, a:number = 1.0) => {
+export const drawImage = (source:Buffer, target:Buffer, x:number, y:number, sx:number, sy:number, sw:number, sh:number, flipX:boolean = false, a:number = 1.0) => {
   for (let i = sx; i < sx + sw; i++) {
     if (x + i - sx < 0 || x + i - sx >= target.width) continue
     for (let j = sy; j < sy + sh; j++) {
@@ -38,7 +38,7 @@ export const drawImage = (source:Buffer, target:Buffer, x:number, y:number, sx:n
       const index = i + j * source.width
       const ptr = index * 4
       if (source.data[ptr + 3] === 0) continue
-      drawPixel(target, x + i - sx, y + j - sy, {
+      drawPixel(target, flipX ? x + sx - i + sw : x + i - sx, y + j - sy, {
         r: source.data[ptr],
         g: source.data[ptr + 1],
         b: source.data[ptr + 2],

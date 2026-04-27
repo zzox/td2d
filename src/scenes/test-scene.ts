@@ -56,6 +56,7 @@ export class TestScene implements Scene {
   bgColor:Color
 
   guy:Actor
+  guyFlipX:boolean = false
   things:Thing[] = []
   particles:Particle[] = []
 
@@ -102,6 +103,8 @@ export class TestScene implements Scene {
       this.things.push(testBouncer())
     }
 
+    this.guyFlipX = !!keys.get('f')
+
     this.things.forEach(updatePhysics)
     this.particles.forEach(updatePhysics)
 
@@ -121,11 +124,11 @@ export class TestScene implements Scene {
 
     this.things.forEach(t => {
       if (t.type === ThingType.Guy) {
-        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 8, 8, 8, 8)
+        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 8, 8, 8, 8, this.guyFlipX, 1.0)
       } else if (t.type === ThingType.Bullet) {
         drawPixel(this.buf, t.pos.x, t.pos.y, White)
       } else if (t.type === ThingType.Test) {
-        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 16, 16, 16, 16, 0.5)
+        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 16, 16, 16, 16, false, 0.5)
       }
     })
 

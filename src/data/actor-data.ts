@@ -75,7 +75,7 @@ export const makeParticle = (x:number, y:number):Particle => ({
   size: vec2(1, 1),
   bounce: 1.0,
   time: 0.0,
-  lifetime: 0.25 + Math.random() + 0.25,
+  lifetime: 0.25 + Math.random() * 0.25,
   colorSteps: [[0.1, White], [0.17, Yellow], [0.25, Orange], [0.5, Grey]]
 })
 
