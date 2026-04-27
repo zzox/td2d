@@ -5,7 +5,7 @@ import { justPressed, keys } from '../core/keys'
 import { checkDirectionalCollision, overlaps, updatePhysics } from '../core/physics'
 import { Scene } from '../core/scene'
 import { Collides, collides, vec2 } from '../core/types'
-import { Actor, defaultThing, getActor, Thing, ThingType } from '../data/actor-data'
+import { Actor, defaultThing, getActor, makeParticle, Particle, PhysicsObject, Thing, ThingType } from '../data/actor-data'
 import { makeBullet } from '../data/bullet-data'
 import { White } from '../data/colors'
 import { forEachGI, getGridItem, Grid, makeGrid, setGridItem } from '../util/grid'
@@ -27,7 +27,7 @@ const getWall = (grid:Grid<number>, x:number, y:number):[number, number, number,
 }
 
 // Returns true if there's a collision
-export const collideWall = (thing:Thing, walls:Grid<number>, x:number, y:number):boolean => {
+export const collideWall = (thing:PhysicsObject, walls:Grid<number>, x:number, y:number):boolean => {
   const [wx, wy, ww, wh, collides] = getWall(walls, x, y)
   if (overlaps(thing.pos.x, thing.pos.y, thing.size.x, thing.size.y, wx, wy, ww, wh)) {
     return checkDirectionalCollision(thing, { pos: vec2(wx, wy), size: vec2(ww, wh) } as Thing, true, collides)
@@ -57,6 +57,7 @@ export class TestScene implements Scene {
 
   guy:Actor
   things:Thing[] = []
+  particles:Particle[] = []
 
   walls!:Grid<number>
 
@@ -79,6 +80,8 @@ export class TestScene implements Scene {
   }
 
   update () {
+    const delta = 1 / FPS
+
     if (keys.get('ArrowLeft')) {
       this.guy.vel.x = -120
     } else if (keys.get('ArrowRight')) {
@@ -100,8 +103,14 @@ export class TestScene implements Scene {
     }
 
     this.things.forEach(updatePhysics)
+    this.particles.forEach(updatePhysics)
 
     this.checkCollisions()
+
+    this.particles = this.particles.filter(p => {
+      p.time -= delta
+      return p.time > 0
+    })
 
     this.things = this.things.filter(t => !t.dead)
   }
@@ -120,6 +129,17 @@ export class TestScene implements Scene {
       }
     })
 
+    this.particles.forEach(p => {
+      let color = White
+      for (let i = 0; i < p.colorSteps.length; i++) {
+        if (p.time < p.colorSteps[i][0]) {
+          color = p.colorSteps[i][1]
+          break
+        }
+      }
+      drawPixel(this.buf, p.pos.x, p.pos.y, { ...color, a: 128 })
+    })
+
     const bunnies = 0
     for (let i = 0; i < bunnies; i++) {
       drawImage(this.image!, this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height) + 10, 8, 8, 48, 8)
@@ -135,6 +155,11 @@ export class TestScene implements Scene {
     const bullet = makeBullet(vec2(this.guy.pos.x + 6, this.guy.pos.y + 2), 240)
     // if (this.guy.facing === ) {}
     this.things.push(bullet)
+
+    const shootParticles = 5
+    for (let i = 0; i < shootParticles; i++) {
+      this.particles.push(makeParticle(this.guy.pos.x + 6, this.guy.pos.y + 2))
+    }
   }
 
   checkCollisions () {
@@ -152,6 +177,15 @@ export class TestScene implements Scene {
       if (collided) {
         this.handleCollision(thing)
       }
+    })
+
+    this.particles.forEach(particle => {
+      forEachGI(this.walls, (x, y, wall) => {
+        if (wall === 0) return
+
+        // TODO: move vec2(1, 1) out?
+        collideWall(particle, this.walls, x, y)
+      })
     })
   }
 

@@ -1,5 +1,7 @@
+import { Color } from '../core/draw'
 import { noCollides } from '../core/physics'
 import { Collides, vec2, Vec2 } from '../core/types'
+import { Grey, Orange, White, Yellow } from './colors'
 
 // tile index of the thing
 export enum ThingType {
@@ -21,7 +23,7 @@ export enum AnimThingState {
   PreThrowWalk = 802,
 }
 
-type PhysicsObject = {
+export type PhysicsObject = {
   pos:Vec2
   last:Vec2
   vel:Vec2
@@ -29,6 +31,7 @@ type PhysicsObject = {
   drag:Vec2
   maxVel:Vec2
   size:Vec2
+  bounce:number
   touching:Collides
   gravityFactor:number
 }
@@ -41,9 +44,28 @@ export type Thing = PhysicsObject & {
   state:ThingState
   stateTime:number
   offset:Vec2
-  bounce:number
 //   isActor:boolean
 }
+
+export type Particle = PhysicsObject & {
+  time:number
+  colorSteps:[number, Color][]
+}
+
+export const makeParticle = (x:number, y:number):Particle => ({
+  pos: vec2(x, y),
+  last: vec2(x, y),
+  vel: vec2(-200 + Math.random() * 400, -200 + Math.random() * 100),
+  acc: vec2(),
+  drag: vec2(500, 500),
+  maxVel: vec2(2000, 2000),
+  size: vec2(1, 1),
+  bounce: 1.0,
+  touching: noCollides(),
+  gravityFactor: 1.0,
+  time: 0.5 + Math.random() + 0.5,
+  colorSteps: [[0.1, White], [0.2, Yellow], [0.3, Orange], [0.6, Grey]]
+})
 
 export const defaultThing:Thing = {
   pos: vec2(),
