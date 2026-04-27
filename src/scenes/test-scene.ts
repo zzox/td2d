@@ -48,6 +48,23 @@ const testBouncer = () => ({
   type: ThingType.Test
 })
 
+enum Dir {
+  Left = 'left',
+  Right = 'right',
+  Up = 'up',
+  Down = 'down',
+}
+
+enum LR {
+  Left = Dir.Left,
+  Right = Dir.Right
+}
+
+enum UD {
+  Up = Dir.Up,
+  Down = Dir.Down
+}
+
 export class TestScene implements Scene {
   width:number
   height:number
@@ -61,6 +78,11 @@ export class TestScene implements Scene {
 
   guy:Actor
   guyFlipX:boolean = false
+  guyLR:LR[] = []
+  guyUD:UD[] = []
+  guyFacing:LR = LR.Right
+  aimDir:Dir = Dir.Right
+
   things:Thing[] = []
   particles:Particle[] = []
 
@@ -89,13 +111,59 @@ export class TestScene implements Scene {
   update () {
     const delta = 1 / FPS
 
+    if (justPressed.get('ArrowLeft')) this.addLR(LR.Left)
     if (keys.get('ArrowLeft')) {
       this.guy.vel.x = -120
-    } else if (keys.get('ArrowRight')) {
+    } else {
+      this.removeLR(LR.Left)
+    }
+
+    if (justPressed.get('ArrowRight')) this.addLR(LR.Right)
+    if (keys.get('ArrowRight')) {
       this.guy.vel.x = 120
     } else {
+      this.removeLR(LR.Right)
+    }
+
+    if (justPressed.get('ArrowUp')) this.addUD(UD.Up)
+    if (keys.get('ArrowUp')) {
+    } else {
+      this.removeUD(UD.Up)
+    }
+
+    if (justPressed.get('ArrowDown')) this.addUD(UD.Down)
+    if (keys.get('ArrowDown')) {
+    } else {
+      this.removeUD(UD.Down)
+    }
+
+    // TEMP:
+    if (!keys.get('ArrowLeft') && !keys.get('ArrowRight')) {
       this.guy.vel.x = 0
     }
+
+    if (this.guyLR.length > 0) {
+      if (this.guyLR[0] === LR.Left) {
+        this.guyFacing = LR.Left
+      } else {
+        this.guyFacing = LR.Right
+      }
+    }
+
+    // let facing:Dir | null = null
+    if (this.guyUD.length > 0) {
+      if (this.guyUD[0] === UD.Up) {
+        this.aimDir = Dir.Up
+      } else {
+        this.aimDir = Dir.Down
+      }
+    } else {
+      this.aimDir = this.guyFacing === LR.Left ? Dir.Left : Dir.Right 
+    }
+
+    // if (facing !== null) {
+    //   this.guyFacing = facing
+    // }
 
     if (justPressed.get('z') && this.guy.touching.down) {
       this.guy.vel.y = -120
@@ -132,7 +200,9 @@ export class TestScene implements Scene {
 
     this.things.forEach(t => {
       if (t.type === ThingType.Guy) {
-        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 8, 8, 8, 8, this.guyFlipX)
+        const index = this.aimDir === Dir.Up ? 4 : this.aimDir === Dir.Down ? 8 : 0
+
+        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), index * 8, 0, 8, 8, this.guyFacing === LR.Left)
         drawImage(this.image!, this.mask, Math.floor(t.pos.x), Math.floor(t.pos.y), 24, 48, 8, 8)
       } else if (t.type === ThingType.Bullet) {
         drawPixel(this.buf, t.pos.x, t.pos.y, White)
@@ -164,13 +234,14 @@ export class TestScene implements Scene {
       if (wall > 0) drawTile(this.image!, this.buf, 56 + wall - 1, x + y * this.walls.width)
     })
 
-    // drawImage(this.mask, this.buf, 0, 0, 0, 0, this.width, this.height)
+    // stamp `mask` data onto `cover`
     for (let i = 0; i < this.cover.data.length; i++) {
       if (this.mask.data[i] > 0) {
         this.cover.data[i] = 0
       }
     }
-    drawImage(this.cover, this.buf, 0, 0, 0, 0, this.width, this.height)
+    // // drawImage(this.mask, this.buf, 0, 0, 0, 0, this.width, this.height)
+    // drawImage(this.cover, this.buf, 0, 0, 0, 0, this.width, this.height)
 
     return this.buf
   }
@@ -234,5 +305,23 @@ export class TestScene implements Scene {
 
   addTile (x:number, y:number, num:number) {
     setGridItem(this.walls, x, y, num)
+  }
+
+  addLR (dir:LR) {
+    this.removeLR(dir)
+    this.guyLR.push(dir)
+  }
+
+  removeLR (dir:LR) {
+    this.guyLR = this.guyLR.filter(d => d !== dir)
+  }
+
+  addUD (dir:UD) {
+    this.removeUD(dir)
+    this.guyUD.push(dir)
+  }
+
+  removeUD (dir:UD) {
+    this.guyUD = this.guyUD.filter(d => d !== dir)
   }
 }
