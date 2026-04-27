@@ -7,7 +7,7 @@ import { Scene } from '../core/scene'
 import { Collides, collides, vec2 } from '../core/types'
 import { Actor, defaultThing, getActor, makeParticle, Particle, PhysicsObject, Thing, ThingType } from '../data/actor-data'
 import { makeBullet } from '../data/bullet-data'
-import { Grey, White } from '../data/colors'
+import { Black, Grey, White, Transparent } from '../data/colors'
 import { forEachGI, getGridItem, Grid, makeGrid, setGridItem } from '../util/grid'
 
 const getWall = (grid:Grid<number>, x:number, y:number):[number, number, number, number, Collides] => {
@@ -25,6 +25,8 @@ const getWall = (grid:Grid<number>, x:number, y:number):[number, number, number,
 
   return [xx, yy, w, h, c]
 }
+
+const HalfBlack = color(0, 0, 0, 128)
 
 // Returns true if there's a collision
 export const collideWall = (thing:PhysicsObject, walls:Grid<number>, x:number, y:number):boolean => {
@@ -50,7 +52,9 @@ export class TestScene implements Scene {
   width:number
   height:number
 
-  buf!:Buffer
+  buf:Buffer
+  mask:Buffer
+  cover:Buffer
 
   image?:Buffer
   bgColor:Color
@@ -68,6 +72,8 @@ export class TestScene implements Scene {
     this.bgColor = color(12, 17, 1)
 
     this.buf = createBuffer(this.width, this.height)
+    this.mask = createBuffer(this.width, this.height)
+    this.cover = createBuffer(this.width, this.height)
 
     this.guy = getActor()
     this.guy.pos.x = 32
@@ -120,11 +126,14 @@ export class TestScene implements Scene {
 
   draw ():Buffer {
     clear(this.buf, this.bgColor)
+    clear(this.mask, Transparent)
+    clear(this.cover, HalfBlack)
     // drawPixel(this.buf, Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height), { r: 123, g: 123, b: 123, a: 255 })
 
     this.things.forEach(t => {
       if (t.type === ThingType.Guy) {
-        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 8, 8, 8, 8, this.guyFlipX, 1.0)
+        drawImage(this.image!, this.buf, Math.floor(t.pos.x), Math.floor(t.pos.y), 8, 8, 8, 8, this.guyFlipX)
+        drawImage(this.image!, this.mask, Math.floor(t.pos.x), Math.floor(t.pos.y), 24, 48, 8, 8)
       } else if (t.type === ThingType.Bullet) {
         drawPixel(this.buf, t.pos.x, t.pos.y, White)
       } else if (t.type === ThingType.Test) {
@@ -134,13 +143,16 @@ export class TestScene implements Scene {
 
     this.particles.forEach(p => {
       let color = Grey
+      let index = 3
       for (let i = 0; i < p.colorSteps.length; i++) {
         if (p.time < p.colorSteps[i][0]) {
           color = p.colorSteps[i][1]
+          index = i
           break
         }
       }
       drawPixel(this.buf, p.pos.x, p.pos.y, { ...color, a: 128 })
+      drawImage(this.image!, this.mask, p.pos.x - 3, p.pos.y - 3, 24 - index * 8, 48, 8, 8)
     })
 
     const bunnies = 0
@@ -151,6 +163,15 @@ export class TestScene implements Scene {
     forEachGI(this.walls, (x, y, wall) => {
       if (wall > 0) drawTile(this.image!, this.buf, 56 + wall - 1, x + y * this.walls.width)
     })
+
+    // drawImage(this.mask, this.buf, 0, 0, 0, 0, this.width, this.height)
+    for (let i = 0; i < this.cover.data.length; i++) {
+      if (this.mask.data[i] > 0) {
+        this.cover.data[i] = 0
+      }
+    }
+    drawImage(this.cover, this.buf, 0, 0, 0, 0, this.width, this.height)
+
     return this.buf
   }
 

@@ -1,5 +1,7 @@
 import { color } from '../core/draw'
 
+export const Transparent = color(0, 0, 0, 0)
+export const Black = color()
 export const White = color(255, 255, 255)
 export const Yellow = color(255, 252, 64)
 export const Orange = color(250, 106, 10)
