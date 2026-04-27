@@ -32,7 +32,7 @@ export const updatePhysics = (obj:PhysicsObject) => {
     newY = Math.min(0, newY + obj.drag.y * delta)
   }
 
-  // configure velocity around max velocity.
+  // configure velocity around max velocity
   obj.vel.x = clamp(newX, -obj.maxVel.x, obj.maxVel.x)
   obj.vel.y = clamp(newY, -obj.maxVel.y, obj.maxVel.y)
 

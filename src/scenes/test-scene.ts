@@ -39,7 +39,7 @@ export const collideWall = (thing:PhysicsObject, walls:Grid<number>, x:number, y
 }
 
 const testBouncer = () => ({
-  ...defaultThing,
+  ...defaultThing(),
   gravityFactor: 1,
   size: vec2(16, 16),
   pos: vec2(48, 100),
@@ -141,7 +141,12 @@ export class TestScene implements Scene {
 
     this.knocktime -= delta
     if (this.knocktime < 0) {
-      this.guy.vel.x = xVel * 120
+      this.guy.acc.x = xVel * 2000
+      this.guy.bounce = 0
+      this.guy.drag.x = this.guy.touching.down ? 1000 : 500
+    } else {
+      this.guy.bounce = 0.8
+      this.guy.drag.x = 0
     }
 
     // let facing:Dir | null = null
@@ -243,7 +248,7 @@ export class TestScene implements Scene {
   guyShoot () {
     const posX = this.guyFacing === LR.Left ? this.guy.pos.x + 2 : this.guy.pos.x + 6
     const posY = this.guy.pos.y + 2
-    const vel = this.guyFacing === LR.Left ? -this.weapon.knockback : this.weapon.knockback
+    const vel = this.guyFacing === LR.Left ? -this.weapon.vel : this.weapon.vel
     const bullet = makeBullet(vec2(posX, posY), vel)
     // if (this.guy.facing === ) {}
     this.things.push(bullet)
@@ -253,7 +258,8 @@ export class TestScene implements Scene {
       this.particles.push(makeParticle(posX, posY))
     }
 
-    this.guy.vel.x = -vel
+    // multiply negative bullet velocity by weapon knockback
+    this.guy.vel.x = -vel * this.weapon.knockback
     this.knocktime = this.weapon.knocktime
   }
 

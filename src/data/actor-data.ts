@@ -53,7 +53,7 @@ export type Particle = PhysicsObject & {
   colorSteps:[number, Color][]
 }
 
-export const defaultObj:PhysicsObject = {
+export const defaultObj = ():PhysicsObject => ({
   pos: vec2(),
   last: vec2(),
   vel: vec2(),
@@ -64,10 +64,10 @@ export const defaultObj:PhysicsObject = {
   touching: noCollides(),
   gravityFactor: 1,
   bounce: 0.0
-}
+})
 
 export const makeParticle = (x:number, y:number):Particle => ({
-  ...defaultObj,
+  ...defaultObj(),
   pos: vec2(x, y),
   last: vec2(x, y),
   vel: vec2(-200 + Math.random() * 400, -200 + Math.random() * 100),
@@ -79,18 +79,23 @@ export const makeParticle = (x:number, y:number):Particle => ({
   colorSteps: [[0.1, White], [0.17, Yellow], [0.25, Orange], [0.5, Grey]]
 })
 
-export const defaultThing:Thing = {
-  ...defaultObj,
+export const defaultThing = ():Thing => ({
+  ...defaultObj(),
   dead: false,
   health: 1,
   type: ThingType.Nothing,
   state: ThingState.None,
   stateTime: 0,
-  offset: vec2(0, 0)
-}
+  offset: vec2(0, 0),
+})
 
 export type Actor = Thing & {}
 
 export const getActor = ():Actor => {
-  return { ...defaultThing, type: ThingType.Guy }
+  return {
+    ...defaultThing(),
+    maxVel: vec2(120, 240),
+    drag: vec2(1000, 0),
+    type: ThingType.Guy
+  }
 } 
