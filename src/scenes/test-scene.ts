@@ -7,7 +7,7 @@ import { Scene } from '../core/scene'
 import { Collides, collides, vec2 } from '../core/types'
 import { Actor, defaultThing, getActor, makeParticle, Particle, PhysicsObject, Thing, ThingType } from '../data/actor-data'
 import { makeBullet } from '../data/bullet-data'
-import { White } from '../data/colors'
+import { Grey, White } from '../data/colors'
 import { forEachGI, getGridItem, Grid, makeGrid, setGridItem } from '../util/grid'
 
 const getWall = (grid:Grid<number>, x:number, y:number):[number, number, number, number, Collides] => {
@@ -108,8 +108,8 @@ export class TestScene implements Scene {
     this.checkCollisions()
 
     this.particles = this.particles.filter(p => {
-      p.time -= delta
-      return p.time > 0
+      p.time += delta
+      return p.time < p.lifetime
     })
 
     this.things = this.things.filter(t => !t.dead)
@@ -130,7 +130,7 @@ export class TestScene implements Scene {
     })
 
     this.particles.forEach(p => {
-      let color = White
+      let color = Grey
       for (let i = 0; i < p.colorSteps.length; i++) {
         if (p.time < p.colorSteps[i][0]) {
           color = p.colorSteps[i][1]

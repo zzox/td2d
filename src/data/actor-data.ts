@@ -49,25 +49,11 @@ export type Thing = PhysicsObject & {
 
 export type Particle = PhysicsObject & {
   time:number
+  lifetime:number
   colorSteps:[number, Color][]
 }
 
-export const makeParticle = (x:number, y:number):Particle => ({
-  pos: vec2(x, y),
-  last: vec2(x, y),
-  vel: vec2(-200 + Math.random() * 400, -200 + Math.random() * 100),
-  acc: vec2(),
-  drag: vec2(500, 500),
-  maxVel: vec2(2000, 2000),
-  size: vec2(1, 1),
-  bounce: 1.0,
-  touching: noCollides(),
-  gravityFactor: 1.0,
-  time: 0.5 + Math.random() + 0.5,
-  colorSteps: [[0.1, White], [0.2, Yellow], [0.3, Orange], [0.6, Grey]]
-})
-
-export const defaultThing:Thing = {
+export const defaultObj:PhysicsObject = {
   pos: vec2(),
   last: vec2(),
   vel: vec2(),
@@ -77,13 +63,30 @@ export const defaultThing:Thing = {
   size: vec2(8, 8),
   touching: noCollides(),
   gravityFactor: 1,
+  bounce: 0.0
+}
+
+export const makeParticle = (x:number, y:number):Particle => ({
+  ...defaultObj,
+  pos: vec2(x, y),
+  last: vec2(x, y),
+  vel: vec2(-200 + Math.random() * 400, -200 + Math.random() * 100),
+  drag: vec2(500, 500),
+  size: vec2(1, 1),
+  bounce: 1.0,
+  time: 0.0,
+  lifetime: 0.25 + Math.random() + 0.25,
+  colorSteps: [[0.1, White], [0.17, Yellow], [0.25, Orange], [0.5, Grey]]
+})
+
+export const defaultThing:Thing = {
+  ...defaultObj,
   dead: false,
   health: 1,
   type: ThingType.Nothing,
   state: ThingState.None,
   stateTime: 0,
-  offset: vec2(0, 0),
-  bounce: 0.0,
+  offset: vec2(0, 0)
 }
 
 export type Actor = Thing & {}
