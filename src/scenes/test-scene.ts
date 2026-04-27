@@ -8,6 +8,7 @@ import { Collides, collides, vec2 } from '../core/types'
 import { Actor, defaultThing, getActor, makeParticle, Particle, PhysicsObject, Thing, ThingType } from '../data/actor-data'
 import { makeBullet } from '../data/bullet-data'
 import { Black, Grey, White, Transparent } from '../data/colors'
+import { getWeapon, Weapon } from '../data/weapon-data'
 import { forEachGI, getGridItem, Grid, makeGrid, setGridItem } from '../util/grid'
 
 const getWall = (grid:Grid<number>, x:number, y:number):[number, number, number, number, Collides] => {
@@ -82,6 +83,8 @@ export class TestScene implements Scene {
   guyUD:UD[] = []
   guyFacing:LR = LR.Right
   aimDir:Dir = Dir.Right
+  knocktime:number = 0
+  weapon:Weapon
 
   things:Thing[] = []
   particles:Particle[] = []
@@ -106,48 +109,39 @@ export class TestScene implements Scene {
     console.log(this.walls, getWall(this.walls, 0, 4))
 
     this.things = [this.guy, testBouncer()]
+
+    this.weapon = getWeapon()
   }
 
   update () {
     const delta = 1 / FPS
 
     if (justPressed.get('ArrowLeft')) this.addLR(LR.Left)
-    if (keys.get('ArrowLeft')) {
-      this.guy.vel.x = -120
-    } else {
-      this.removeLR(LR.Left)
-    }
+    if (!keys.get('ArrowLeft')) this.removeLR(LR.Left)
 
     if (justPressed.get('ArrowRight')) this.addLR(LR.Right)
-    if (keys.get('ArrowRight')) {
-      this.guy.vel.x = 120
-    } else {
-      this.removeLR(LR.Right)
-    }
+    if (!keys.get('ArrowRight')) this.removeLR(LR.Right)
 
     if (justPressed.get('ArrowUp')) this.addUD(UD.Up)
-    if (keys.get('ArrowUp')) {
-    } else {
-      this.removeUD(UD.Up)
-    }
+    if (!keys.get('ArrowUp')) this.removeUD(UD.Up)
 
     if (justPressed.get('ArrowDown')) this.addUD(UD.Down)
-    if (keys.get('ArrowDown')) {
-    } else {
-      this.removeUD(UD.Down)
-    }
+    if (!keys.get('ArrowDown')) this.removeUD(UD.Down)
 
-    // TEMP:
-    if (!keys.get('ArrowLeft') && !keys.get('ArrowRight')) {
-      this.guy.vel.x = 0
-    }
-
+    let xVel = 0
     if (this.guyLR.length > 0) {
       if (this.guyLR[0] === LR.Left) {
         this.guyFacing = LR.Left
+        xVel = -1
       } else {
         this.guyFacing = LR.Right
+        xVel = 1
       }
+    }
+
+    this.knocktime -= delta
+    if (this.knocktime < 0) {
+      this.guy.vel.x = xVel * 120
     }
 
     // let facing:Dir | null = null
@@ -247,14 +241,20 @@ export class TestScene implements Scene {
   }
 
   guyShoot () {
-    const bullet = makeBullet(vec2(this.guy.pos.x + 6, this.guy.pos.y + 2), 240)
+    const posX = this.guyFacing === LR.Left ? this.guy.pos.x + 2 : this.guy.pos.x + 6
+    const posY = this.guy.pos.y + 2
+    const vel = this.guyFacing === LR.Left ? -this.weapon.knockback : this.weapon.knockback
+    const bullet = makeBullet(vec2(posX, posY), vel)
     // if (this.guy.facing === ) {}
     this.things.push(bullet)
 
     const shootParticles = 5
     for (let i = 0; i < shootParticles; i++) {
-      this.particles.push(makeParticle(this.guy.pos.x + 6, this.guy.pos.y + 2))
+      this.particles.push(makeParticle(posX, posY))
     }
+
+    this.guy.vel.x = -vel
+    this.knocktime = this.weapon.knocktime
   }
 
   checkCollisions () {
