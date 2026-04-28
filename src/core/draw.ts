@@ -19,6 +19,24 @@ export const clear = (buf:Buffer, color:Color) => {
   }
 }
 
+export const drawRect = (target:Buffer, x:number, y:number, w:number, h:number, color:Color) => {
+  for (let i = x; i < x + w; i++) {
+    for (let j = y; j < y + h; j++) {
+      if (i === x || i === x + w - 1 || j === y || j === y + h - 1) {
+        drawPixel(target, i, j, color)
+      }
+    }
+  }
+}
+
+export const fillRect = (target:Buffer, x:number, y:number, w:number, h:number, color:Color) => {
+  for (let i = x; i < x + w; i++) {
+    for (let j = y; j < y + h; j++) {
+      drawPixel(target, i, j, color)
+    }
+  }
+}
+
 // draw a tile from an index to an index
 export const drawTile = (source:Buffer, target:Buffer, fromTile:number, toTile:number) => {
   const fromX = fromTile % (source.width / TileWidth)
@@ -51,6 +69,7 @@ export const drawImage = (source:Buffer, target:Buffer, x:number, y:number, sx:n
 export const drawPixel = (buf:Buffer, x:number, y:number, { r, g, b, a }:Color) => {
   const index = Math.floor(x) + Math.floor(y) * buf.width
   const pos = 4 * index
+  // TODO: remove check
   if (a >= 255) {
     buf.data[pos] = r
     buf.data[pos + 1] = g

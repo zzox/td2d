@@ -1,14 +1,15 @@
 import { Buffer, createBuffer } from '../core/buffer'
 import { FPS, NumTilesHeight, NumTilesWidth, TileHeight, TileWidth } from '../core/const'
-import { clear, Color, color, drawImage, drawPixel, drawTile } from '../core/draw'
+import { clear, Color, color, drawImage, drawPixel, fillRect, drawTile, drawRect } from '../core/draw'
 import { justPressed, keys } from '../core/keys'
 import { checkDirectionalCollision, overlaps, updatePhysics } from '../core/physics'
 import { Scene } from '../core/scene'
 import { Collides, collides, vec2 } from '../core/types'
 import { Actor, defaultThing, getActor, makeParticle, Particle, PhysicsObject, Thing, ThingType } from '../data/actor-data'
 import { makeBullet } from '../data/bullet-data'
-import { Black, Grey, White, Transparent } from '../data/colors'
+import { Black, Grey, White, Transparent, Orange, half, Pink, Yellow } from '../data/colors'
 import { getWeapon, Weapon } from '../data/weapon-data'
+import { Debug } from '../util/debug'
 import { forEachGI, getGridItem, Grid, makeGrid, setGridItem } from '../util/grid'
 
 const getWall = (grid:Grid<number>, x:number, y:number):[number, number, number, number, Collides] => {
@@ -176,7 +177,7 @@ export class TestScene implements Scene {
       this.things.push(testBouncer())
     }
 
-    this.guyFlipX = !!keys.get('f')
+    // this.guyFlipX = !!keys.get('f')
 
     this.things.forEach(updatePhysics)
     this.particles.forEach(updatePhysics)
@@ -232,6 +233,18 @@ export class TestScene implements Scene {
     forEachGI(this.walls, (x, y, wall) => {
       if (wall > 0) drawTile(this.image!, this.buf, 56 + wall - 1, x + y * this.walls.width)
     })
+
+    if (Debug.on) {
+      forEachGI(this.walls, (x, y, wall) => {
+        if (wall > 0) drawRect(this.buf, x * TileWidth, y * TileHeight, TileWidth, TileHeight, half(Yellow))
+      })
+
+      this.things.forEach(t => {
+        drawRect(this.buf, t.pos.x, t.pos.y, t.size.x, t.size.y, half(Pink))
+      })
+    }
+
+    fillRect(this.buf, 12, 4, 24, 12, Orange)
 
     // stamp `mask` data onto `cover`
     for (let i = 0; i < this.cover.data.length; i++) {
