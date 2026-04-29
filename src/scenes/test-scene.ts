@@ -4,7 +4,7 @@ import { clear, Color, color, drawImage, drawPixel, fillRect, drawTile, drawRect
 import { justPressed, keys } from '../core/keys'
 import { checkDirectionalCollision, overlaps, updatePhysics } from '../core/physics'
 import { Scene } from '../core/scene'
-import { Collides, collides, vec2 } from '../core/types'
+import { Collides, collides, Vec2, vec2 } from '../core/types'
 import { Actor, defaultThing, getActor, makeParticle, Particle, PhysicsObject, Thing, ThingType } from '../data/actor-data'
 import { makeBullet } from '../data/bullet-data'
 import { Black, Grey, White, Transparent, Orange, half, Pink, Yellow } from '../data/colors'
@@ -65,6 +65,20 @@ enum LR {
 enum UD {
   Up = Dir.Up,
   Down = Dir.Down
+}
+
+const getAimPosVels = (dir:Dir):[Vec2, Vec2] => {
+  if (dir === Dir.Left) {
+    return [vec2(2, 2), vec2(-1, 0)];
+  } else if (dir === Dir.Right) {
+    return [vec2(6, 2), vec2(1, 0)];
+  } else if (dir === Dir.Up) {
+    return [vec2(4, 0), vec2(0, -1)];
+  } else if (dir === Dir.Down) {
+    return [vec2(4, 0), vec2(0, 1)];
+  }
+
+  throw 'No Dir found'
 }
 
 export class TestScene implements Scene {
@@ -259,10 +273,14 @@ export class TestScene implements Scene {
   }
 
   guyShoot () {
-    const posX = this.guyFacing === LR.Left ? this.guy.pos.x + 2 : this.guy.pos.x + 6
-    const posY = this.guy.pos.y + 2
-    const vel = this.guyFacing === LR.Left ? -this.weapon.vel : this.weapon.vel
-    const bullet = makeBullet(vec2(posX, posY), vel)
+    const [pos, vel] = getAimPosVels(this.aimDir)
+
+    const posX = this.guy.pos.x + pos.x
+    const posY = this.guy.pos.y + pos.y
+    const xVel = vel.x * this.weapon.vel
+    const yVel = vel.y * this.weapon.vel
+
+    const bullet = makeBullet(vec2(posX, posY), vec2(xVel, yVel))
     // if (this.guy.facing === ) {}
     this.things.push(bullet)
 
@@ -272,7 +290,8 @@ export class TestScene implements Scene {
     }
 
     // multiply negative bullet velocity by weapon knockback
-    this.guy.vel.x = -vel * this.weapon.knockback
+    this.guy.vel.x += -xVel * this.weapon.knockback
+    this.guy.vel.y += -yVel * this.weapon.knockback
     this.guy.acc.x = 0
     this.guy.acc.y = 0
     this.knocktime = this.weapon.knocktime
