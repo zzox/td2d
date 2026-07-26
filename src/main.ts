@@ -14,6 +14,7 @@ let scene:Scene
 let debugScale = 0
 
 let image:HTMLImageElement
+let imgData:ImageData
 let context:CanvasRenderingContext2D
 
 let paused:boolean = false
@@ -43,7 +44,6 @@ const draw = () => {
   const renderStart = performance.now()
 
 //   clear()
-  const imgData = context.createImageData(width, height)
   imgData.data.set(scene.draw().data)
   context.putImageData(imgData, 0, 0)
 
@@ -103,6 +103,7 @@ const getImageData = (img:HTMLImageElement):ImageData => {
 const ready = () => {
   console.log(getImageData(image))
   scene.image = getImageData(image)
+  imgData = context.createImageData(width, height)
   next(0)
 }
 
@@ -116,23 +117,20 @@ const resizeCanvas = () => {
   const availW = canvas.parentElement!.getBoundingClientRect().width
   const availH = canvas.parentElement!.getBoundingClientRect().height
 
-  const scale = window.devicePixelRatio
-
-  const maxW = Math.floor(availW / (w * scale - padding))
-  const maxH = Math.floor(availH / (h * scale - padding))
+  const maxW = Math.floor(availW / (w - padding))
+  const maxH = Math.floor(availH / (h - padding))
 
   const multi = Math.max(Math.min(Math.min(maxW, maxH), maxMulti), 1)
 
-  debugScale = multi * scale
+  debugScale = multi
 
-  const width = Math.floor(multi * w * scale)
-  const height = Math.floor(multi * h * scale)
-
-  canvas.style.width = `${width}px`
-  canvas.style.height = `${height}px`
+  const width = w * multi
+  const height = h * multi
 
   fixed.style.left = `${(availW - (width)) / 2}px`
   fixed.style.top = `${(availH - (height)) / 2}px`
+  canvas.style.width = `${width}px`
+  canvas.style.height = `${height}px`
 }
 
 const run = async () => {
