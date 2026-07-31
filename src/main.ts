@@ -117,18 +117,18 @@ const resizeCanvas = () => {
   const availW = canvas.parentElement!.getBoundingClientRect().width
   const availH = canvas.parentElement!.getBoundingClientRect().height
 
-  const maxW = Math.floor(availW / (w - padding))
-  const maxH = Math.floor(availH / (h - padding))
+  const maxW = Math.floor(availW / (w / window.devicePixelRatio - padding))
+  const maxH = Math.floor(availH / (h / window.devicePixelRatio - padding))
 
   const multi = Math.max(Math.min(Math.min(maxW, maxH), maxMulti), 1)
 
   debugScale = multi
 
-  const width = w * multi
-  const height = h * multi
+  const width = w * multi / window.devicePixelRatio
+  const height = h * multi / window.devicePixelRatio
 
-  fixed.style.left = `${(availW - (width)) / 2}px`
-  fixed.style.top = `${(availH - (height)) / 2}px`
+  fixed.style.left = `${(availW - width) / 2}px`
+  fixed.style.top = `${(availH - height) / 2}px`
   canvas.style.width = `${width}px`
   canvas.style.height = `${height}px`
 }
